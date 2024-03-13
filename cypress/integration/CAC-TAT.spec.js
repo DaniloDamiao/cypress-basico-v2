@@ -257,7 +257,7 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
 
     });
 
-    it.only('Aula 13 Exercício 01 - encontrar o gato e demonstrar que ele está visível', function () {
+    it('Aula 13 Exercício 01 - encontrar o gato e demonstrar que ele está visível', function () {
         cy.get('#cat')
             .invoke('show')
         .should('be.visible')
