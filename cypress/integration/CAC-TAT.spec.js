@@ -9,6 +9,8 @@
 
 describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', function () {
     
+    const THREE_SECOND_MS = 3000
+
     beforeEach(function () {
         //carrega a pagina do site a visitar. 
         cy.visit('./src/index.html')
@@ -23,16 +25,24 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
         
         let longtext = 'Teste teste teste teste teste teste'
 
+        cy.clock()
+
         cy.get('#firstName').type('Danilo')
         cy.get('#lastName').type('Santos')
         cy.get('#email').type('danilo@teste.com.br')
         cy.get('#open-text-area').type(longtext, { delay: 0 })
         cy.contains('.button', 'Enviar').click()
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECOND_MS)
+
+         cy.get('.success').should('not.be.visible')
         
     });
 
     it('Aula 2 - Exercicio Extra 02 - exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function () {
+
+        cy.clock()
 
         cy.get('#firstName').type('Danilo')
         cy.get('#lastName').type('Santos')
@@ -40,16 +50,24 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
         cy.get('#open-text-area').type('teste')
         cy.contains('.button', 'Enviar').click()
         cy.get('.error').should('be.visible')
+
+        cy.tick(THREE_SECOND_MS)
+
+        cy.get('.error').should('not.be.visible')
     });
 
-    it('Aula 2 - Exercicio Extra 03 - campo telefone continua vazio quando preenchido com o valor não númerico', function () {
+   
+    Cypress._.times(3, function () {
+         it('Aula 2 - Exercicio Extra 03 - campo telefone continua vazio quando preenchido com o valor não númerico', function () {
         cy.get('#phone')
             .type('Abcdefghij')
             .should('have.value', '')
-    });
-
+        });
+    })
     it('Aula 2 - Exercicio Extra 04 - exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function () {
         
+        cy.clock()
+
         cy.get('#firstName').type('Danilo')
         cy.get('#lastName').type('Santos')
         cy.get('#email').type('danilo#teste.com.b')
@@ -57,6 +75,10 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
         cy.get('#open-text-area').type('teste')
         cy.contains('.button', 'Enviar').click()
         cy.get('.error').should('be.visible')
+
+        cy.tick(THREE_SECOND_MS)
+
+        cy.get('.error').should('not.be.visible')
 
     });
     
@@ -76,10 +98,18 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
     });
 
     it('Aula 2 - Exercicio Extra 06 - exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function () {
+       
+        cy.clock()
+       
         cy.contains('.button', 'Enviar')
             .click()
         cy.get('.error')
             .should('be.visible')
+        
+        cy.tick(THREE_SECOND_MS)
+        
+        cy.get('.error')
+            .should('not.be.visible')
     });
     it('Aula 2 - Exercicio Extra 06 - exibe mensagem de erro ao submeter o formulário sem preencher os campos obrigatórios', function () {
         cy.contains('.button', 'Enviar')
@@ -91,7 +121,11 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
     it('envia o formuário com sucesso usando um comando customizado', function () {
         cy.fillMandatoryFieldsAndSubmit(),
         
-        cy.get('.success').should('be.visible')
+            cy.get('.success').should('be.visible')
+        
+        cy.tick(THREE_SECOND_MS)
+
+        cy.get('.success').should('not.be.visible')
         
     });
 
@@ -183,4 +217,49 @@ describe('Aula 2 - Exercicio 01 - Central de Atendimento ao Cliente TAT', functi
             .click()
         cy.contains('Talking About Testing')
     });    
+
+    it('Aula 12 Exercício Extra 02 - exibe e esconde as mensagens de sucesso e erro usando o .invoke', function() {
+    cy.get('.success')
+      .should('not.be.visible')
+      .invoke('show')
+      .should('be.visible')
+      .and('contain', 'Mensagem enviada com sucesso.')
+      .invoke('hide')
+      .should('not.be.visible')
+    cy.get('.error')
+      .should('not.be.visible')
+      .invoke('show')
+      .should('be.visible')
+      .and('contain', 'Valide os campos obrigatórios!')
+      .invoke('hide')
+      .should('not.be.visible')
+    })
+    
+    it('Aula 12 Exercício Extra 03 - preenche a area de texto usando o comando invoke', function() {
+        
+        const longTest = Cypress._.repeat('0123456789', 20)
+
+        cy.get('#open-text-area')
+            .invoke('val', longTest)
+        .should('have.value', longTest)
+
+    });
+
+    it('Aula 12 Exercício Extra 04 - faz uma requisição HTTP', function () {
+        
+        cy.request('https://cac-tat.s3.eu-central-1.amazonaws.com/index.html')
+            .should(function (response) {
+                const { status, statusText, body } = response
+                expect(status).to.equal(200)
+                expect(statusText).to.equal('OK')
+                expect(body).to.include('CAC TAT')
+        })
+
+    });
+
+    it.only('Aula 13 Exercício 01 - encontrar o gato e demonstrar que ele está visível', function () {
+        cy.get('#cat')
+            .invoke('show')
+        .should('be.visible')
+    });
 })
